@@ -88,6 +88,7 @@ auto main(int argc, char* argv[]) -> int
     
     std::map<std::string, std::string> values;
     Extract(doc, rootElement, nsResolver, "/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result", std::inserter(values, std::begin(values)));
+    Extract(doc, rootElement, nsResolver, "/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/jobDetails/additionalInformation/forceOptions", std::inserter(values, std::begin(values)));
 
     for( auto&& entry : values )
     {
