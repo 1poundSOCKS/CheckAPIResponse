@@ -1,0 +1,12 @@
+# cmake
+
+/CMakeFiles/
+*.vcxproj
+*.vcxproj.filters
+CMakeCache.txt
+*.sln
+cmake_install.cmake
+*.dir
+
+#cmake --build
+Debug/
