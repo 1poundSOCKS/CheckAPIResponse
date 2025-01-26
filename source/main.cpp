@@ -68,9 +68,14 @@ auto main(int argc, char* argv[]) -> int
         NULL);
 
     DOMNode* node = result->getNodeValue();
-    auto content = result->getNodeValue()->getTextContent();
-    auto value = XMLString::transcode(content);
-    std::cout << value << '\n';
+    DOMNode* child = node->getFirstChild();
+    DOMNode::NodeType type = child->getNodeType();
+
+    if( type == DOMNode::TEXT_NODE )
+    {
+      auto childValue = child->getNodeValue();
+      std::cout << XMLString::transcode(childValue) << '\n';
+    }
 
     if (result->getNodeValue() == NULL)
     {
