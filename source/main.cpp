@@ -4,6 +4,32 @@ using namespace xercesc;
 
 #pragma warning (disable:4459)
 
+template<typename inserter_type>
+auto Extract(DOMDocument* doc, DOMElement* rootElement, DOMXPathNSResolver *nsResolver, std::string expression, inserter_type inserter) -> void
+{
+  auto expressionToEvaluate = XMLString::transcode(expression.c_str());
+  DOMXPathResult* result=doc->evaluate(expressionToEvaluate, rootElement, nsResolver, DOMXPathResult::ORDERED_NODE_SNAPSHOT_TYPE, NULL);
+
+  DOMNode* node = result->getNodeValue();
+  DOMNode* child = node->getFirstChild();
+  DOMNodeList* children = node->getChildNodes();
+  auto childCount = children->getLength();
+  
+  for( int childIndex = 0; childIndex < childCount; ++childIndex )
+  {
+    DOMNode* childNode = children->item(childIndex);
+    DOMNode* childText = childNode->getFirstChild();
+
+    auto nodeName = childNode->getNodeName();
+    auto childValue = childText->getNodeValue();
+
+    std::string nameStr = XMLString::transcode(nodeName);
+    std::string valueStr = XMLString::transcode(childValue);
+
+    inserter = { nameStr, valueStr };
+  }
+}
+
 auto main(int argc, char* argv[]) -> int
 {
   for( int arg = 0; arg < argc; ++arg )
@@ -56,27 +82,16 @@ auto main(int argc, char* argv[]) -> int
     char* temp2 = XMLString::transcode(tagName);
     std::cout << temp2 << '\n';
 
-    auto nsResolver = doc->createNSResolver(rootElement);
+    DOMXPathNSResolver* nsResolver = doc->createNSResolver(rootElement);
     nsResolver->addNamespaceBinding(XMLString::transcode("SOAP-ENV"), XMLString::transcode("http://www.w3.org/2003/05/soap-envelope"));
     nsResolver->addNamespaceBinding(XMLString::transcode("sp2"), XMLString::transcode("http://www.servicepower.com/sp.xsd1"));
     
-    auto expression = XMLString::transcode("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result");
-    DOMXPathResult* result=doc->evaluate(expression, rootElement,nsResolver, DOMXPathResult::ORDERED_NODE_SNAPSHOT_TYPE, NULL);
+    std::map<std::string, std::string> values;
+    Extract(doc, rootElement, nsResolver, "/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result", std::inserter(values, std::begin(values)));
 
-    DOMNode* node = result->getNodeValue();
-    DOMNode* child = node->getFirstChild();
-    DOMNodeList* children = node->getChildNodes();
-    auto childCount = children->getLength();
-    
-    for( int childIndex = 0; childIndex < childCount; ++childIndex )
+    for( auto&& entry : values )
     {
-      DOMNode* childNode = children->item(childIndex);
-      DOMNode* childText = childNode->getFirstChild();
-
-      auto nodeName = childNode->getNodeName();
-      auto childValue = childText->getNodeValue();
-
-      std::cout << XMLString::transcode(nodeName) << std::string_view(": ") << XMLString::transcode(childValue) << '\n';
+      std::cout << entry.first << std::string_view(": ") << entry.second << '\n';
     }
   }
   catch (const XMLException& toCatch)
