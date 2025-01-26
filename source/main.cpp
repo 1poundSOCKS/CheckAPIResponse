@@ -59,33 +59,24 @@ auto main(int argc, char* argv[]) -> int
     auto nsResolver = doc->createNSResolver(rootElement);
     nsResolver->addNamespaceBinding(XMLString::transcode("SOAP-ENV"), XMLString::transcode("http://www.w3.org/2003/05/soap-envelope"));
     nsResolver->addNamespaceBinding(XMLString::transcode("sp2"), XMLString::transcode("http://www.servicepower.com/sp.xsd1"));
-
-    DOMXPathResult* result=doc->evaluate(
-        XMLString::transcode("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result/type"),
-        rootElement,
-        nsResolver,
-        DOMXPathResult::ORDERED_NODE_SNAPSHOT_TYPE,
-        NULL);
+    
+    auto expression = XMLString::transcode("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result");
+    DOMXPathResult* result=doc->evaluate(expression, rootElement,nsResolver, DOMXPathResult::ORDERED_NODE_SNAPSHOT_TYPE, NULL);
 
     DOMNode* node = result->getNodeValue();
     DOMNode* child = node->getFirstChild();
-    DOMNode::NodeType type = child->getNodeType();
+    DOMNodeList* children = node->getChildNodes();
+    auto childCount = children->getLength();
+    
+    for( int childIndex = 0; childIndex < childCount; ++childIndex )
+    {
+      DOMNode* childNode = children->item(childIndex);
+      DOMNode* childText = childNode->getFirstChild();
 
-    if( type == DOMNode::TEXT_NODE )
-    {
-      auto childValue = child->getNodeValue();
-      std::cout << XMLString::transcode(childValue) << '\n';
-    }
+      auto nodeName = childNode->getNodeName();
+      auto childValue = childText->getNodeValue();
 
-    if (result->getNodeValue() == NULL)
-    {
-      std::cout << "There is no result for the provided XPath " << '\n';
-    }
-    else
-    {
-      // auto nodeValue = result->getNodeValue()->getFirstChild()->getNodeValue();
-      // auto value = XMLString::transcode(result->getNodeValue());
-      // std::cout << value << '\n';
+      std::cout << XMLString::transcode(nodeName) << std::string_view(": ") << XMLString::transcode(childValue) << '\n';
     }
   }
   catch (const XMLException& toCatch)
