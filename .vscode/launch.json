@@ -6,7 +6,7 @@
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${workspaceFolder}/Debug/CheckAPIResponse.exe",
-      "args": [],
+      "args": ["test/data/GetJob_response.xml", "GetJobResponse"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": []

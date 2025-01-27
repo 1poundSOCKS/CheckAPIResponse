@@ -39,12 +39,14 @@ auto main(int argc, char* argv[]) -> int
 
   std::cout << '\n';
 
-  if( argc != 1 )
+  if( argc != 3 )
   {
     return 0;
   }
 
   std::cout << "CheckAPIResponse started" << '\n';
+  const char* xmlFile = argv[1];
+  const char* responseTag = argv[2];
 
   auto config = LoadDefaultConfig();
 
@@ -57,9 +59,9 @@ auto main(int argc, char* argv[]) -> int
     return 1;
   }
 
-  XMLCh tempStr[100];
-  XMLString::transcode("LS", tempStr, 99);
+  auto tempStr = XMLString::transcode("LS");
   DOMImplementation *impl = DOMImplementationRegistry::getDOMImplementation(tempStr);
+  XMLString::release(&tempStr);
   DOMLSParser* parser = ((DOMImplementationLS*)impl)->createLSParser(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
 
   if (parser->getDomConfig()->canSetParameter(XMLUni::fgDOMValidate, true))
@@ -71,7 +73,6 @@ auto main(int argc, char* argv[]) -> int
   if (parser->getDomConfig()->canSetParameter(XMLUni::fgDOMDatatypeNormalization, true))
       parser->getDomConfig()->setParameter(XMLUni::fgDOMDatatypeNormalization, true);
 
-  const char* xmlFile = "test/data/GetJob_response.xml";
   DOMDocument *doc = 0;
 
   try
@@ -87,8 +88,10 @@ auto main(int argc, char* argv[]) -> int
     nsResolver->addNamespaceBinding(XMLString::transcode("sp2"), XMLString::transcode("http://www.servicepower.com/sp.xsd1"));
     
     std::map<std::string, std::string> values;
-    Extract(doc, rootElement, nsResolver, "/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/result", std::inserter(values, std::begin(values)));
-    Extract(doc, rootElement, nsResolver, "/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:GetJobResponse/jobDetails/additionalInformation/forceOptions", std::inserter(values, std::begin(values)));
+    std::string tag1 = std::string("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:") + std::string(responseTag) + std::string("/result");
+    std::string tag2 = std::string("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:") + std::string(responseTag) + std::string("/jobDetails/additionalInformation/forceOptions");
+    Extract(doc, rootElement, nsResolver, tag1, std::inserter(values, std::begin(values)));
+    Extract(doc, rootElement, nsResolver, tag2, std::inserter(values, std::begin(values)));
 
     for( auto&& entry : values )
     {
