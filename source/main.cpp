@@ -89,9 +89,9 @@ auto main(int argc, char* argv[]) -> int
     
     std::map<std::string, std::string> values;
     std::string tag1 = std::string("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:") + std::string(responseTag) + std::string("/result");
-    std::string tag2 = std::string("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:") + std::string(responseTag) + std::string("/jobDetails/additionalInformation/forceOptions");
+    // std::string tag2 = std::string("/SOAP-ENV:Envelope/SOAP-ENV:Body/sp2:") + std::string(responseTag) + std::string("/jobDetails/additionalInformation/forceOptions");
     Extract(doc, rootElement, nsResolver, tag1, std::inserter(values, std::begin(values)));
-    Extract(doc, rootElement, nsResolver, tag2, std::inserter(values, std::begin(values)));
+    // Extract(doc, rootElement, nsResolver, tag2, std::inserter(values, std::begin(values)));
 
     for( auto&& entry : values )
     {
